@@ -1,0 +1,26 @@
+#pragma kernel Draw
+#pragma kernel ClearTexture
+
+int BrushRadius;
+half BrushSmoothness;
+uint2 BrushPosition;
+RWTexture2D<float4> Result;
+
+[numthreads(8, 8, 1)]
+void Draw(uint3 id : SV_DispatchThreadID)
+{
+    uint2 vec = BrushPosition - id.xy;
+    half distance = sqrt(vec.x * vec.x + vec.y * vec.y);
+    
+    if (distance < BrushRadius)
+    {
+        float a = 1 - (distance / BrushRadius);
+        Result[id.xy] += float4(0, 0, 0, a * BrushSmoothness);
+    }
+}
+
+[numthreads(8, 8, 1)]
+void ClearTexture(uint3 id : SV_DispatchThreadID)
+{
+    Result[id.xy] = float4(0, 0, 0, 0);
+}
